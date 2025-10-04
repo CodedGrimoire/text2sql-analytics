@@ -1,0 +1,18 @@
+{
+  "metrics": {},
+  "ri_findings": [
+    "SKIP: orders.customerid -> customers.customerid",
+    "SKIP: orders.employeeid -> employees.employeeid",
+    "SKIP: orders.shipperid -> shippers.shipperid",
+    "SKIP: orderdetails.orderid -> orders.orderid",
+    "SKIP: orderdetails.productid -> products.productid",
+    "SKIP: products.supplierid -> suppliers.supplierid",
+    "SKIP: products.categoryid -> categories.categoryid",
+    "SKIP: territories.regionid -> region.regionid",
+    "SKIP: employeeterritories.employeeid -> employees.employeeid",
+    "SKIP: employeeterritories.territoryid -> territories.territoryid",
+    "SKIP: customercustomerdemo.customerid -> customers.customerid",
+    "SKIP: customercustomerdemo.customertypeid -> customerdemographics.customertypeid"
+  ],
+  "type_errors": {}
+}
