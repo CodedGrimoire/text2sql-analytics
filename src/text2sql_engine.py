@@ -92,6 +92,9 @@ STRICT RULES:
 - Use table aliases for complex queries.
 - Always include a LIMIT when many rows could be returned.
 - Do not explain, do not add comments, output ONLY pure SQL.
+- Always use exactly the listed table/column names.
+- Do not invent synonyms.
+
 
 Question: {question}
 SQL:
@@ -140,6 +143,6 @@ if __name__ == "__main__":
     engine = Text2SQLEngine(debug=True)
 
     # Example run
-    question = "Identify customers who have placed orders for products from all categories"
+    question = "Which products are out of stock but not discontinued?"
     payload = engine.run(question, timeout_ms=5000, limit=1000)
     print(json.dumps(payload, indent=2, default=_json_default))
