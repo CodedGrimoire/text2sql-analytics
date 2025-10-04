@@ -1,8 +1,7 @@
 """
 src/text2sql_engine.py
 
-Converts natural language questions into SQL queries using Gemini API,
-validates them, executes against PostgreSQL, and returns results.
+Debug version: show raw Gemini response without query validation.
 """
 
 import os
@@ -10,7 +9,8 @@ import google.generativeai as genai
 import pandas as pd
 from dotenv import load_dotenv
 
-from src.query_validator import sanitize_query
+# Commenting out validator for now
+# from src.query_validator import sanitize_query
 from src.database import execute_query
 
 # Load environment variables
@@ -24,8 +24,8 @@ if not GEMINI_API_KEY:
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Use Gemini Pro for SQL generation
-MODEL_NAME = "gemini-pro"
+# Updated Gemini model
+MODEL_NAME = "gemini-2.5-flash-lite"
 
 
 class Text2SQLEngine:
@@ -33,16 +33,6 @@ class Text2SQLEngine:
         self.model = genai.GenerativeModel(model_name)
 
     def generate_sql(self, question: str, schema_context: str = "") -> str:
-        """
-        Generate SQL query from natural language using Gemini.
-
-        Args:
-            question (str): Natural language input.
-            schema_context (str): Optional DB schema description.
-
-        Returns:
-            str: Generated SQL query.
-        """
         prompt = f"""
         You are an expert SQL assistant.
         Given the following database schema:
@@ -52,39 +42,24 @@ class Text2SQLEngine:
         Question: {question}
         SQL:
         """
-
         response = self.model.generate_content(prompt)
         sql = response.text.strip()
         return sql
 
     def run_query(self, question: str, schema_context: str = "") -> dict:
-        """
-        Full pipeline: NL question -> SQL -> validation -> execution -> results.
-
-        Args:
-            question (str): Natural language query.
-            schema_context (str): Optional schema.
-
-        Returns:
-            dict: {"sql": str, "results": list of dicts}
-        """
         # Step 1: Generate SQL
         raw_sql = self.generate_sql(question, schema_context)
+        print("🤖 Raw Gemini response:\n", raw_sql)
 
-        # Step 2: Sanitize SQL
-        safe_sql = sanitize_query(raw_sql)
+        # Step 2: Directly run it (⚠️ no validation for now!)
+        df: pd.DataFrame = execute_query(raw_sql)
 
-        # Step 3: Execute SQL
-        df: pd.DataFrame = execute_query(safe_sql)
-
-        # Step 4: Convert to JSON
-        return {"sql": safe_sql, "results": df.to_dict(orient="records")}
+        return {"sql": raw_sql, "results": df.to_dict(orient="records")}
 
 
 if __name__ == "__main__":
     engine = Text2SQLEngine()
 
-    # Example run
     question = "Which employee has processed the most orders?"
     try:
         result = engine.run_query(question)
