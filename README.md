@@ -117,7 +117,80 @@ Paths: OUTPUT_DIR for reports, SCHEMA_DIR for generated DDL
 
 Keeps secrets out of code and allows per-environment setup.
 
+
+## Bonus Modules
+
+
+1. API (api.py)
+
+Framework: FastAPI
+
+Provides REST endpoints for interacting with the engine.
+
+Endpoints:
+
+GET /ask?question=... → Runs a natural language query, returns JSON results.
+
+GET /monitor → Returns DB performance stats (CPU, memory, DB backends).
+
+GET /history → (optional) Returns last N queries logged in SQLite
+run:
+uvicorn src.api:app --reload --port 8000
+
+
+2. Query Cache (cache.py)
+
+Implements LRU caching to store results of repeated queries.
+
+Prevents re-execution of identical SQL on DB.
+
+Backed by Python functools.lru_cache.
+
+from src.cache import QueryCache
+cache = QueryCache(maxsize=100)
+df = cache.get(sql, engine)
+3. Query History (history.py)
+
+Uses a local SQLite database (data/query_history.db).
+
+Logs every query: natural language question, generated SQL, success/failure, timestamp.
+
+Schema:
+
+CREATE TABLE history (
+    id INTEGER PRIMARY KEY,
+    question TEXT,
+    sql TEXT,
+    success BOOLEAN,
+    timestamp TEXT
+);
+Sample usage:
+
+from src.history import QueryHistory
+h = QueryHistory()
+h.log("Top products", "SELECT ...", True)
+
+4. Monitoring (monitor.py)
+
+Provides live performance metrics:
+
+CPU load
+
+Memory usage
+
+PostgreSQL statistics (pg_stat_database)
+
+Can also fetch query execution plans with EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON).
+
+Usage:
+
+from src.monitor import get_db_stats, get_query_plan
+print(get_db_stats())
+print(get_query_plan("SELECT * FROM products LIMIT 5"))
+
 ## 🏗️ Architecture Diagram  
+User → Text2SQL Engine → Gemini (SQL generation) → Validator → Database → Results
+                                ↘ Cache / History / Monitor ↙
 
 ```mermaid
 flowchart TD
