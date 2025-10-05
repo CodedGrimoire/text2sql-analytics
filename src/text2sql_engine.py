@@ -123,6 +123,29 @@ SQL:
 # ---------------- CLI ----------------
 if __name__ == "__main__":
     engine = Text2SQLEngine(debug=True)
-    q = "Top 5 products by total sales with their categories."
+    q = "What is the average order value by country?"
     payload = engine.run(q, timeout_ms=5000, limit=1000)
+
+    # Always print JSON for test automation
     print(json.dumps(payload, indent=2, default=_json_default))
+
+    # If results exist, also pretty-print like psql
+    if payload.get("ok") and payload.get("results"):
+        df = pd.DataFrame(payload["results"])
+
+        # Build prompt for Gemini to format like SQL console
+        format_prompt = f"""
+Format the following query result into a SQL console style table
+with aligned columns like PostgreSQL \dt output. Only output the table.
+
+Columns: {', '.join(df.columns)}
+Rows:
+{df.to_csv(index=False)}
+"""
+        try:
+            formatter = genai.GenerativeModel(MODEL_NAME)
+            formatted = formatter.generate_content(format_prompt)
+            print("\nPretty Output:\n")
+            print(formatted.text.strip())
+        except Exception as e:
+            print(f"\n[Pretty-printing failed: {e}]")
