@@ -54,7 +54,7 @@ def test_avg_order_value_by_customer(text2sql_engine):
 
 def test_products_above_avg_margin_together(text2sql_engine):
     q = "Which products have above-average profit margins and are frequently ordered together?"
-    payload, metrics, score = evaluate_query(text2sql_engine, q, expected_non_empty=False)
+    payload, metrics, score = evaluate_query(text2sql_engine, q, expected_non_empty=True)
     assert metrics["execution_success"] == 1
     assert "join" in payload["sql"].lower()
     assert "product" in payload["sql"].lower()

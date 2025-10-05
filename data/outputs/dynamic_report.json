@@ -1,0 +1,142 @@
+{
+  "metrics": {
+    "mainsheet": {
+      "rows": 2305,
+      "cols": 32,
+      "null_counts": {
+        "refid": 0,
+        "orderid": 0,
+        "orderdate": 0,
+        "productid": 0,
+        "sellprice": 0,
+        "quantity": 0,
+        "salediscount": 0,
+        "customerid": 0,
+        "employeeid": 0,
+        "requireddate": 0,
+        "shippeddate": 223,
+        "shipvia": 0,
+        "shippername": 0,
+        "companyname": 0,
+        "contactname": 0,
+        "city": 0,
+        "country": 0,
+        "productname": 0,
+        "supplierid": 0,
+        "suppliername": 0,
+        "categoryid": 0,
+        "categoryname": 0,
+        "quantityperunit": 0,
+        "costprice": 0,
+        "costdiscount": 0,
+        "unitsinstock": 0,
+        "unitsonorder": 0,
+        "reorderlevel": 0,
+        "discontinued": 0,
+        "lastname": 0,
+        "firstname": 0,
+        "title": 0
+      },
+      "dtypes": {
+        "refid": "int64",
+        "orderid": "int64",
+        "orderdate": "datetime64[ns]",
+        "productid": "int64",
+        "sellprice": "float64",
+        "quantity": "int64",
+        "salediscount": "float64",
+        "customerid": "object",
+        "employeeid": "int64",
+        "requireddate": "datetime64[ns]",
+        "shippeddate": "datetime64[ns]",
+        "shipvia": "int64",
+        "shippername": "object",
+        "companyname": "object",
+        "contactname": "object",
+        "city": "object",
+        "country": "object",
+        "productname": "object",
+        "supplierid": "int64",
+        "suppliername": "object",
+        "categoryid": "int64",
+        "categoryname": "object",
+        "quantityperunit": "object",
+        "costprice": "float64",
+        "costdiscount": "float64",
+        "unitsinstock": "int64",
+        "unitsonorder": "int64",
+        "reorderlevel": "int64",
+        "discontinued": "bool",
+        "lastname": "object",
+        "firstname": "object",
+        "title": "object"
+      },
+      "pk": "refid",
+      "fks": [],
+      "duplicates": 0
+    },
+    "sheet1": {
+      "rows": 7,
+      "cols": 2,
+      "null_counts": {
+        "beverages": 0,
+        "0_4": 0
+      },
+      "dtypes": {
+        "beverages": "object",
+        "0_4": "float64"
+      },
+      "pk": "beverages",
+      "fks": [],
+      "duplicates": 0
+    }
+  },
+  "pks": {
+    "mainsheet": "refid",
+    "sheet1": "beverages"
+  },
+  "fks": {
+    "mainsheet": [],
+    "sheet1": []
+  },
+  "types": {
+    "mainsheet": {
+      "refid": "INTEGER",
+      "orderid": "INTEGER",
+      "orderdate": "DATE",
+      "productid": "INTEGER",
+      "sellprice": "NUMERIC(18,6)",
+      "quantity": "INTEGER",
+      "salediscount": "NUMERIC(18,6)",
+      "customerid": "VARCHAR(50)",
+      "employeeid": "INTEGER",
+      "requireddate": "DATE",
+      "shippeddate": "DATE",
+      "shipvia": "INTEGER",
+      "shippername": "VARCHAR(50)",
+      "companyname": "VARCHAR(50)",
+      "contactname": "VARCHAR(50)",
+      "city": "VARCHAR(50)",
+      "country": "VARCHAR(50)",
+      "productname": "VARCHAR(50)",
+      "supplierid": "INTEGER",
+      "suppliername": "VARCHAR(50)",
+      "categoryid": "INTEGER",
+      "categoryname": "VARCHAR(50)",
+      "quantityperunit": "VARCHAR(50)",
+      "costprice": "NUMERIC(18,6)",
+      "costdiscount": "NUMERIC(18,6)",
+      "unitsinstock": "INTEGER",
+      "unitsonorder": "INTEGER",
+      "reorderlevel": "INTEGER",
+      "discontinued": "BOOLEAN",
+      "lastname": "VARCHAR(50)",
+      "firstname": "VARCHAR(50)",
+      "title": "VARCHAR(50)"
+    },
+    "sheet1": {
+      "beverages": "VARCHAR(50)",
+      "0_4": "NUMERIC(18,6)"
+    }
+  }
+}

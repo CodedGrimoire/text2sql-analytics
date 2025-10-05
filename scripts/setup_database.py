@@ -1,14 +1,5 @@
-"""
-scripts/setup_database.py
-Apply schema SQL files in order using SQLAlchemy/psycopg2.
-"""
-
 import os
-from pathlib import Path
-from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
-
-load_dotenv()
 
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASS = os.getenv("DB_PASS", "postgres")
@@ -16,33 +7,18 @@ DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "northwind")
 
-ENGINE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DB_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/postgres"
 
-SQL_DIR = Path("data/schema")
-ORDER = [
-    "00_extensions.sql",
-    "01_tables.sql",
-    # "02_triggers.sql",  # optional
-    "03_indexes.sql",
-    "99_security.sql",
-]
+def reset_and_seed():
+    engine = create_engine(DB_URL, isolation_level="AUTOCOMMIT")
+    with engine.connect() as conn:
+        conn.execute(text(f"DROP DATABASE IF EXISTS {DB_NAME}"))
+        conn.execute(text(f"CREATE DATABASE {DB_NAME}"))
+    print(f"✅ Database {DB_NAME} recreated.")
 
-def apply_sql(engine, path: Path):
-    with open(path, "r") as f:
-        sql = f.read()
-    with engine.begin() as conn:
-        conn.execute(text(sql))
-
-def main():
-    engine = create_engine(ENGINE_URL)
-    for fname in ORDER:
-        fpath = SQL_DIR / fname
-        if not fpath.exists():
-            print(f"⚠️  Missing {fpath}, skipping")
-            continue
-        print(f"▶️  Applying {fpath} ...")
-        apply_sql(engine, fpath)
-    print("✅ Schema & security applied")
+    # Now load schema + data
+    os.system(f"docker exec -i pg-northwind psql -U {DB_USER} -d {DB_NAME} < northwind_psql/northwind.sql")
+    print("📦 Northwind schema & data loaded.")
 
 if __name__ == "__main__":
-    main()
+    reset_and_seed()
