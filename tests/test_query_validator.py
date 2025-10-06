@@ -17,3 +17,4 @@ def test_allow_select_statements():
 def test_sql_injection_prevention():
     with pytest.raises(ValueError):
         sanitize_query("SELECT * FROM customers; DROP TABLE orders;")
+

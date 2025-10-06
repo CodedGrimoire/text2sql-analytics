@@ -333,7 +333,7 @@ tests/test_accuracy/test_sales_representatives PASSED
 
 ## 📚 Additional Docs
 - Schema diagram: [dbdiagram.io](https://dbdiagram.io)  
-- API docs: `/docs` (FastAPI Swagger UI)  
+ 
 - ## Test Coverage Report
 To generate a test coverage report in HTML format:
 
