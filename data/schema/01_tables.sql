@@ -1,0 +1,46 @@
+-- Auto-generated schema (dynamic)
+CREATE TABLE IF NOT EXISTS mainsheet (
+  refid INTEGER NOT NULL,
+  orderid INTEGER NOT NULL,
+  orderdate DATE NOT NULL,
+  productid INTEGER NOT NULL,
+  sellprice NUMERIC(18,6) NOT NULL,
+  quantity INTEGER NOT NULL,
+  salediscount NUMERIC(18,6) NOT NULL,
+  customerid VARCHAR(50) NOT NULL,
+  employeeid INTEGER NOT NULL,
+  requireddate DATE NOT NULL,
+  shippeddate DATE,
+  shipvia INTEGER NOT NULL,
+  shippername VARCHAR(50) NOT NULL,
+  companyname VARCHAR(50) NOT NULL,
+  contactname VARCHAR(50) NOT NULL,
+  city VARCHAR(50) NOT NULL,
+  country VARCHAR(50) NOT NULL,
+  productname VARCHAR(50) NOT NULL,
+  supplierid INTEGER NOT NULL,
+  suppliername VARCHAR(50) NOT NULL,
+  categoryid INTEGER NOT NULL,
+  categoryname VARCHAR(50) NOT NULL,
+  quantityperunit VARCHAR(50) NOT NULL,
+  costprice NUMERIC(18,6) NOT NULL,
+  costdiscount NUMERIC(18,6) NOT NULL,
+  unitsinstock INTEGER NOT NULL,
+  unitsonorder INTEGER NOT NULL,
+  reorderlevel INTEGER NOT NULL,
+  discontinued BOOLEAN NOT NULL,
+  lastname VARCHAR(50) NOT NULL,
+  firstname VARCHAR(50) NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (refid)
+);
+
+CREATE TABLE IF NOT EXISTS sheet1 (
+  beverages VARCHAR(50) NOT NULL,
+  0_4 NUMERIC(18,6) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (beverages)
+);
