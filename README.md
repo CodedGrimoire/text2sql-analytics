@@ -207,7 +207,7 @@ flowchart TD
     K --> L[Query History Logger (SQLite)]
     J --> M[Monitoring Dashboard]
 ```
-
+link: https://www.mermaidchart.com/app/projects/f44c1d46-dae4-43d4-8be3-dcd16a010081/diagrams/7f22b13d-2287-488a-99b3-b5a0068e49d7/share/invite/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkb2N1bWVudElEIjoiN2YyMmIxM2QtMjI4Ny00ODhhLTk5YjMtYjVhMDA2OGU0OWQ3IiwiYWNjZXNzIjoiRWRpdCIsImlhdCI6MTc1OTgyNzY2Mn0.FLti7-yjjv-ItR6PrtHgA9xfxgKNS1O_tuBzgsBTVkQ
 ---
 
 ## ⚙️ Setup Instructions
