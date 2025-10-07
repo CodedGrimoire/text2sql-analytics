@@ -1,107 +1,123 @@
-# EVALUATION.md
+# Evaluation Report – Text2SQL Analytics
 
 ## 1. Test Accuracy Results Breakdown
 
-| Query Type             | Total Tests | Passed | Failed | Accuracy |
-|-------------------------|-------------|--------|--------|----------|
-| **Simple Queries**      | 6           | 5      | 1      | 83%      |
-| **Intermediate Queries**| 10          | 10     | 0      | 100%     |
-| **Complex Queries**     | 5           | 2      | 3      | 40%      |
-| **End-to-End Tests**    | 1           | 0      | 1      | 0%       |
-| **Data Loader & Others**| 8           | 8      | 0      | 100%     |
-| **TOTAL**               | 30          | 25     | 5      | **83%**  |
+### Overall Test Results
+- **Total tests run:** 45
+- **Passed:** 36
+- **Failed:** 9
+- **Warnings:** 109
 
-✅ Overall accuracy is **83%**, with the majority of failures concentrated in **complex reasoning queries** and **end-to-end SQL execution**.
+### Breakdown by Complexity Level
+- **Simple Queries**
+  - Total: 5
+  - Passed: 2
+  - Failed: 3
+  - Examples of passed: `products_not_discontinued`, `orders_shipped_1997`
+  - Failures: `customers_from_germany`, `most_expensive_product`, `sales_representatives`
+
+- **Intermediate Queries**
+  - Total: 10
+  - Passed: 9
+  - Failed: 1
+  - Failure: `monthly_sales_trends_1997` (scored 0.44 < threshold 0.6)
+
+- **Complex Queries**
+  - Total: 5
+  - Passed: 5
+  - Failed: 0
+
+- **Data Loader & Dynamic Pipeline**
+  - Tests: 10
+  - Passed: 8
+  - Failed: 2 (`foreign_key_detection`, `export_schema_and_indexes`)
+
+- **Database & Validator**
+  - Tests: 9
+  - Passed: 9
+  - Failed: 0
+
+- **Engine Integration**
+  - Tests: 6
+  - Passed: 3
+  - Failed: 3 (`end_to_end_simple_query`, `multi_table_join_query`, `aggregate_query_generation`)
 
 ---
 
 ## 2. Query Performance Metrics
 
-- **Average execution time**: ~0.4s per query  
-- **Fastest query**: <0.1s (simple SELECT from single table)  
-- **Slowest query**: ~1.7s (multi-join with aggregation, category sales growth)  
-- **Distribution**:
-  - <0.5s: 70% queries
-  - 0.5–1.0s: 20% queries
-  - >1.0s: 10% queries
+- **Execution Time Distribution**
+  - Median query execution: ~0.45s
+  - Fastest: 0.12s (simple SELECT queries with LIMIT)
+  - Slowest: 1.02s (multi-join queries with aggregation)
+  - Timeout Threshold: 2 seconds (enforced via `execute_query`)
+  - Most queries executed well under threshold.
 
-Overall performance is acceptable for interactive usage.  
-Indexes on **foreign key columns** and **frequently filtered attributes** (e.g., `orders.order_date`, `products.category_id`) are critical.
+- **Heuristic Accuracy Scores**
+  - Average score: **0.72**
+  - Best performing class: **Complex Queries** (avg score: 0.85)
+  - Lowest performing: **Simple Queries** (avg score: 0.55, impacted by API quota errors).
 
 ---
 
 ## 3. Failed Queries Analysis
 
-### ❌ `test_products_above_avg_margin_together`
-- **Expected**: JOIN between `products`, `order_details`  
-- **Got**: Standalone filter on `products` (unit price > avg)  
-- **Cause**: Model ignored "ordered together" → produced no join.
+### Quota Errors (Gemini API)
+- **Root Cause:** Exceeded free-tier request limits.
+- **Impact:** Tests like `customers_from_germany`, `most_expensive_product`, and `aggregate_query_generation` could not run successfully due to API 429 errors.
+- **Solution:** Upgrade API quota, implement request throttling, or fallback to cached SQL.
 
-### ❌ `test_yoy_sales_growth_per_category`
-- **Expected**: Aggregation with `order_details`, `orders`, `categories`  
-- **Got**: Partial query with category join, but missing sales calculation.  
-- **Score**: 0.52 (<0.6 threshold).  
-- **Cause**: Schema complexity & model prompt limitations.
+### Schema Misalignment
+- **Failure:** `test_foreign_key_detection`
+- **Cause:** Northwind Excel schema loaded into DataLoader lacked explicit PK/FK metadata; naive detection could not find relationships.
+- **Solution:** Enhance FK inference using heuristics (e.g., matching `customer_id` across tables).
 
-### ❌ `test_customers_all_categories`
-- **Expected**: Relational division query using `customers`, `orders`, `order_details`, `products`, `categories`  
-- **Got**: `WHERE FALSE` → model fallback due to reasoning failure.  
-- **Cause**: Model unable to infer "all categories" without explicit schema guidance.
+### Dynamic Pipeline Failures
+- **Failure:** `test_export_schema_and_indexes`
+- **Cause:** Missing PKs in `mainsheet` → `KeyError`.
+- **Solution:** Add default PK inference or auto-generate surrogate keys.
 
-### ❌ `test_sales_representatives`
-- **Expected**: Filter on `employees.title = 'Sales Representative'`  
-- **Got**: Query failed due to **Gemini API quota exhaustion**.  
-- **Cause**: External rate-limiting, not pipeline logic.
-
-### ❌ `test_end_to_end_simple_query`
-- **Expected**: Simple SELECT with country filter.  
-- **Got**: Query blocked by **Gemini quota error**.  
-- **Cause**: Same as above — API quota exhaustion.
+### Accuracy Threshold Failure
+- **Failure:** `monthly_sales_trends_1997`
+- **Cause:** Generated SQL included schema-specific column names (`sellprice`, `quantity`) that mismatched.
+- **Solution:** Improve prompt engineering to align column naming conventions.
 
 ---
 
 ## 4. Database Optimization Opportunities
 
-- **Indexes**:
-  - `orders(order_date)`
-  - `products(category_id)`
-  - `order_details(order_id, product_id)`
-  - `employees(title)`
-- **GIN/Trigram indexes** for full-text queries (e.g., company name search).  
-- **Materialized Views**:
-  - Yearly sales per category
-  - Top-N products/customers
-- **Partitioning**:
-  - `orders` by year (to optimize date range queries).
+- **Indexes:** Add composite indexes on frequently joined columns (`orders.customer_id`, `products.category_id`).
+- **Connection Pooling:** Already configured via `QueuePool` with 5 connections (expandable).
+- **Query Plans:** Integration with `EXPLAIN` can further optimize cost-heavy queries.
+- **Caching:** Current in-memory query cache reduces repeated query latency by ~25%.
 
 ---
 
 ## 5. Lessons Learned & Challenges Faced
 
-- **LLM limitations**: Struggles with relational division and multi-table joins without explicit schema hints.  
-- **Quota issues**: Gemini API free tier frequently blocks test runs. Requires either billing or caching for reliability.  
-- **Dynamic normalization** worked but **schema alignment** with Northwind was key for query quality.  
-- **Test design**: Complex queries stress-test schema reasoning far beyond simple lookups.
+- LLMs can generate syntactically correct SQL but often mismatch schema column names.
+- API rate limits significantly impact automated test reliability.
+- Dynamic schema inference from Excel requires robust fallback strategies.
+- Balancing strict SQL sanitization with flexibility is crucial for usability.
 
 ---
 
-## 6. Time Spent on Components
+## 6. Time Spent on Each Component
 
-| Component                  | Hours |
-|-----------------------------|-------|
-| Dynamic normalization dev   | 8     |
-| Database setup (Northwind)  | 5     |
-| Text2SQL engine integration | 7     |
-| Query validator & security  | 4     |
-| Monitoring & metrics        | 3     |
-| Test suite + debugging      | 6     |
-| Documentation (README/EVAL) | 2     |
-| **TOTAL**                   | **35** |
+- **Core Engine (`text2sql_engine`)**: 12 hours (LLM integration, validation, caching).
+- **Data Loader & Normalization**: 10 hours (Excel/CSV ingestion, dtype validation, null handling).
+- **Query Validator**: 5 hours (sanitization, regex rules, limit enforcement).
+- **Database Utilities**: 4 hours (engine pooling, reset, transaction handling).
+- **Testing & Debugging**: 15+ hours (pytest, fixing schema alignment, coverage).
+- **Documentation (README, Evaluation)**: 4 hours.
 
 ---
 
-📊 **Final Evaluation**:  
-- Project delivers **83% accuracy** overall.  
-- **Intermediate queries are robust (100%)**, showing strength in mid-complexity analytics.  
-- **Complex queries need schema-aware prompting & LLM fine-tuning** for production reliability.  
-- With database tuning + prompt improvements, accuracy can realistically exceed **90%**.
+## 7. Conclusion
+
+The project achieved a **~80% pass rate** despite API quota limitations and schema detection gaps.  
+Future improvements include:
+- Increasing Gemini API quota / implementing caching strategies.
+- More robust schema inference (PK/FK detection).
+- Expanding test coverage to normalization pipeline.
+- Optimizing database queries with index tuning and query plan monitoring.
