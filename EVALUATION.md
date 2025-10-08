@@ -104,11 +104,11 @@
 
 ## 6. Time Spent on Each Component
 
-- **Core Engine (`text2sql_engine`)**: 12 hours (LLM integration, validation, caching).
-- **Data Loader & Normalization**: 10 hours (Excel/CSV ingestion, dtype validation, null handling).
+- **Core Engine (`text2sql_engine`)**: 8 hours (LLM integration, validation, caching).
+- **Data Loader & Normalization**: 6 hours (Excel/CSV ingestion, dtype validation, null handling).
 - **Query Validator**: 5 hours (sanitization, regex rules, limit enforcement).
 - **Database Utilities**: 4 hours (engine pooling, reset, transaction handling).
-- **Testing & Debugging**: 15+ hours (pytest, fixing schema alignment, coverage).
+- **Testing & Debugging**: 8+ hours (pytest, fixing schema alignment, coverage).
 - **Documentation (README, Evaluation)**: 4 hours.
 
 ---
